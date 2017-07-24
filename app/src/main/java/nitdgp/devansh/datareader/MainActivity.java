@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -24,6 +23,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener,LocationListener{
 
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected ProgressBar progressBarX;
     protected ProgressBar progressBarY;
     protected ProgressBar progressBarZ;
+    protected File logfile;
+    protected FileOutputStream logOutputStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 100);
         try {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,this);
         }
         catch (SecurityException e){
             e.printStackTrace();
@@ -96,6 +100,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void startAcc(View v){
         mSensorManager.registerListener(this,mAccSensor,SensorManager.SENSOR_DELAY_NORMAL*20,SensorManager.SENSOR_DELAY_NORMAL*20);
+        logfile = new File(Environment.getExternalStorageDirectory()+"/DataReader","log.txt");
+        if(!logfile.exists()){
+            try {
+                logfile.createNewFile();
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        try {
+            logOutputStream = new FileOutputStream(logfile);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void stopAcc(View v){
@@ -103,6 +122,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         progressBarX.setProgress(0);
         progressBarY.setProgress(0);
         progressBarZ.setProgress(0);
+        try {
+            logOutputStream.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     public void startCamera(View v){
@@ -143,6 +168,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             progressBarX.setProgress((int)(event.values[0]*10));
             progressBarY.setProgress((int)(event.values[1]*10));
             progressBarZ.setProgress((int)(event.values[2]*10));
+            String logwrite = timestamp+" : X = "+event.values[0]+", Y = "+event.values[1]+", Z = "+event.values[2];
+            try {
+                logOutputStream.write(logwrite.getBytes());
+                logOutputStream.write(System.getProperty("line.separator").getBytes());
+                logOutputStream.flush();
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -173,6 +207,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         progressBarZ.setProgress(0);
         try{
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,this);
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,this);
         }
         catch (SecurityException e){
             e.printStackTrace();
@@ -191,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onProviderDisabled(String s){
-
+        Toast.makeText(this,"Please enable GPS",Toast.LENGTH_SHORT).show();
     }
 
     @Override
