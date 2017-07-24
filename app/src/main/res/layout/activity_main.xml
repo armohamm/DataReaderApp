@@ -21,53 +21,93 @@
         android:textAlignment="center"
         android:layout_marginBottom="30dp" />
 
-    <TextView
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_below="@id/accView"
+        android:id="@+id/progressBarX"
+        android:indeterminate="false"
+        android:layout_marginBottom="15dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_below="@id/progressBarX"
+        android:id="@+id/progressBarY"
+        android:indeterminate="false"
+        android:layout_marginBottom="15dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_below="@id/progressBarY"
+        android:id="@+id/progressBarZ"
+        android:indeterminate="false"
+        android:layout_marginBottom="15dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/accDefault"
-        android:id="@+id/accText"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/accView"
-        android:layout_marginBottom="30dp"
-        android:textAlignment="center" />
+        android:layout_below="@id/progressBarZ"
+        android:id="@+id/startButton"
+        android:text="@string/startBtn"
+        android:onClick="startAcc"
+        android:layout_alignParentStart="true"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progressBarZ"
+        android:id="@+id/stopButton"
+        android:onClick="stopAcc"
+        android:text="@string/stopBtn"
+        android:layout_alignParentEnd="true"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/stopButton"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/locView"
         android:id="@+id/gpsView"
         android:textAlignment="center"
+        android:layout_marginTop="15dp"
         android:layout_marginBottom="30dp"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/accText"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/gpsView"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/locDefault"
         android:id="@+id/gpsText"
-        android:layout_alignParentEnd="true"
+        android:textAlignment="center"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/gpsView"
-        android:layout_marginBottom="30dp"
-        android:textAlignment="center" />
+        android:layout_alignParentEnd="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/tagGPS"
         android:id="@+id/gpsTag"
-        android:layout_below="@+id/gpsText"
-        android:layout_alignParentStart="true"
-        android:layout_alignEnd="@+id/gpsText"
         android:onClick="startCamera"
         android:layout_marginLeft="100dp"
-        android:layout_marginRight="100dp" />
+        android:layout_marginRight="100dp"
+        android:layout_below="@+id/gpsText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp" />
 
 </RelativeLayout>
 

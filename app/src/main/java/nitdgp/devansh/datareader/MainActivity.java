@@ -1,5 +1,6 @@
 package nitdgp.devansh.datareader;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,11 +14,13 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
@@ -28,9 +31,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected Sensor mAccSensor;
     protected LocationManager mLocationManager;
     protected Location bestKnown;
-    protected TextView accelerometerText;
     protected TextView gpsText;
     protected Button gpsTag;
+    protected ProgressBar progressBarX;
+    protected ProgressBar progressBarY;
+    protected ProgressBar progressBarZ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,19 +44,65 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
-            return;
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[] {
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                },
+                100);
+        try {
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         }
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,this);
-        accelerometerText = (TextView) findViewById(R.id.accText);
+        catch (SecurityException e){
+            e.printStackTrace();
+        }
         gpsText = (TextView) findViewById(R.id.gpsText);
         gpsTag = (Button) findViewById(R.id.gpsTag);
-        Location lastknown = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(lastknown!=null) {
-            String text = "Latitude = " + lastknown.getLatitude() + ",Longitude = " + lastknown.getLongitude();
-            gpsText.setText(text);
-            bestKnown = lastknown;
+        progressBarX = (ProgressBar) findViewById(R.id.progressBarX);
+        progressBarX.setMax(100);
+        progressBarY = (ProgressBar) findViewById(R.id.progressBarY);
+        progressBarY.setMax(100);
+        progressBarZ = (ProgressBar) findViewById(R.id.progressBarZ);
+        progressBarZ.setMax(100);
+        Location lastKnown=null;
+        try {
+            lastKnown = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         }
+        catch (SecurityException e){
+            e.printStackTrace();
+        }
+        if(lastKnown!=null) {
+            String text = "Latitude = " + lastKnown.getLatitude() + ",Longitude = " + lastKnown.getLongitude();
+            gpsText.setText(text);
+            bestKnown = lastKnown;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestcode,String[] perms,int[] grantResults){
+        if(requestcode==100){
+            if(grantResults.length>0){
+                for(int i=0;i<grantResults.length;i++){
+                    if(grantResults[i]!=PackageManager.PERMISSION_GRANTED){
+                        Toast.makeText(this,"Permission Denied",Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
+            }
+        }
+    }
+
+    public void startAcc(View v){
+        mSensorManager.registerListener(this,mAccSensor,SensorManager.SENSOR_DELAY_NORMAL*20,SensorManager.SENSOR_DELAY_NORMAL*20);
+    }
+
+    public void stopAcc(View v){
+        mSensorManager.unregisterListener(this,mAccSensor);
+        progressBarX.setProgress(0);
+        progressBarY.setProgress(0);
+        progressBarZ.setProgress(0);
     }
 
     public void startCamera(View v){
@@ -87,9 +138,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event){
         Sensor sensor = event.sensor;
+        long timestamp = event.timestamp;
         if(sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            String acctext = "X = " + event.values[0] + ", Y = " + event.values[1] + ", Z = " + event.values[2];
-            accelerometerText.setText(acctext);
+            progressBarX.setProgress((int)(event.values[0]*10));
+            progressBarY.setProgress((int)(event.values[1]*10));
+            progressBarZ.setProgress((int)(event.values[2]*10));
         }
     }
 
@@ -115,7 +168,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume(){
         super.onResume();
-        mSensorManager.registerListener(this,mAccSensor,SensorManager.SENSOR_DELAY_NORMAL*2,SensorManager.SENSOR_DELAY_NORMAL*2);
+        progressBarX.setProgress(0);
+        progressBarY.setProgress(0);
+        progressBarZ.setProgress(0);
         try{
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,this);
         }

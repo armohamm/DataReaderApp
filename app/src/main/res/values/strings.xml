@@ -7,4 +7,6 @@
     <string name="tempView">Current Ambience</string>
     <string name="tempDefault">Fetching Current Ambience Data</string>
     <string name="tagGPS">Tag the pothole with GPS!</string>
+    <string name="startBtn">Start</string>
+    <string name="stopBtn">Stop</string>
 </resources>
