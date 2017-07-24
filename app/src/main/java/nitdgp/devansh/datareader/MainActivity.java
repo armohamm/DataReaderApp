@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event){
         Sensor sensor = event.sensor;
-        long timestamp = event.timestamp;
+        long timestamp  = System.currentTimeMillis();
         if(sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             progressBarX.setProgress((int)(event.values[0]*10));
             progressBarY.setProgress((int)(event.values[1]*10));
