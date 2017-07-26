@@ -1,6 +1,10 @@
 package nitdgp.devansh.datareader;
 
-import android.Manifest;
+/**
+ * Created by devansh on 25/7/17.
+ */
+
+import android.Manifest;;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,8 +41,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected ProgressBar progressBarX;
     protected ProgressBar progressBarY;
     protected ProgressBar progressBarZ;
-    protected File logfile;
-    protected FileOutputStream logOutputStream;
+    private final int thresholdAccY = 50;
+    public ListenerThread listenerThread = new ListenerThread();
+    public BroadcastingThread broadcastingThread = new BroadcastingThread("192.168.43.255",8080);
+    public Thread broadcastThread;
+    public Thread listenThread;
+    public Logger logger;
+    public final long TIME_INTERVAL = 1000;
+    public long LAST_BROADCAST;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[] {
+                        Manifest.permission.INTERNET,
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.CAMERA,
                         Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -82,6 +93,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             gpsText.setText(text);
             bestKnown = lastKnown;
         }
+        listenThread = new Thread(listenerThread);
+        listenThread.start();
+        LAST_BROADCAST = System.currentTimeMillis();
+        logger = new Logger("DataReader");
     }
 
     @Override
@@ -100,21 +115,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void startAcc(View v){
         mSensorManager.registerListener(this,mAccSensor,SensorManager.SENSOR_DELAY_NORMAL*20,SensorManager.SENSOR_DELAY_NORMAL*20);
-        logfile = new File(Environment.getExternalStorageDirectory()+"/DataReader","log.txt");
-        if(!logfile.exists()){
-            try {
-                logfile.createNewFile();
-            }
-            catch (IOException e){
-                e.printStackTrace();
-            }
-        }
-        try {
-            logOutputStream = new FileOutputStream(logfile);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void stopAcc(View v){
@@ -122,12 +122,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         progressBarX.setProgress(0);
         progressBarY.setProgress(0);
         progressBarZ.setProgress(0);
-        try {
-            logOutputStream.close();
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
+        logger.close();
     }
 
     public void startCamera(View v){
@@ -168,14 +163,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             progressBarX.setProgress((int)(event.values[0]*10));
             progressBarY.setProgress((int)(event.values[1]*10));
             progressBarZ.setProgress((int)(event.values[2]*10));
-            String logwrite = timestamp+" : X = "+event.values[0]+", Y = "+event.values[1]+", Z = "+event.values[2];
-            try {
-                logOutputStream.write(logwrite.getBytes());
-                logOutputStream.write(System.getProperty("line.separator").getBytes());
-                logOutputStream.flush();
-            }
-            catch (IOException e){
-                e.printStackTrace();
+            if(thresholdAccY<=event.values[1]*10) {
+                if((System.currentTimeMillis() - LAST_BROADCAST)>TIME_INTERVAL) {
+                    broadcastThread = new Thread(broadcastingThread);
+                    broadcastThread.start();
+                    LAST_BROADCAST = System.currentTimeMillis();
+                }
+                String logwrite = timestamp + " : X = " + event.values[0] + ", Y = " + event.values[1] + ", Z = " + event.values[2];
+                logger.d(logwrite);
             }
         }
     }
