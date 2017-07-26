@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public ListenerThread listenerThread;
     public BroadcastingThread broadcastingThread;
     public Thread broadcastThread;
-    public Thread listenThread;
     public Logger logger;
     public Logger loggerBroadcast;
     public Logger loggerReceive;
@@ -98,10 +97,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         logger = new Logger("DataReader");
         loggerBroadcast = new Logger("DataReader","broadcast.txt");
         loggerReceive = new Logger("DataReader","receiver.txt");
-        listenerThread = new ListenerThread(loggerReceive);
+        listenerThread = new ListenerThread(loggerReceive,getApplicationContext());
+        listenerThread.execute();
         broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
-        listenThread = new Thread(listenerThread);
-        listenThread.start();
     }
 
     @Override

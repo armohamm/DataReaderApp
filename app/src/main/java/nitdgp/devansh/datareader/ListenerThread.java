@@ -4,28 +4,33 @@ package nitdgp.devansh.datareader;
  * Created by devansh on 25/7/17.
  */
 
-import android.os.Process;
-import android.support.v7.app.AppCompatActivity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
+import android.widget.Toast;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class ListenerThread extends AppCompatActivity implements Runnable{
+public class ListenerThread extends AsyncTask<Void,String,String>{
     private DatagramPacket packet;
     private DatagramSocket socket;
     private byte buffer[];
     private boolean isRunning;
     public Logger logger;
+    public Context context;
 
-    public ListenerThread(Logger logger){
+    public ListenerThread(Logger logger,Context context){
         isRunning = false;
         this.logger = logger;
+        this.context = context;
     }
 
     @Override
-    public void run(){
+    protected String doInBackground(Void... params){
         try{
-            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             socket = new DatagramSocket(8080, InetAddress.getByName("192.168.43.255"));
             socket.setBroadcast(true);
             isRunning = true;
@@ -34,6 +39,8 @@ public class ListenerThread extends AppCompatActivity implements Runnable{
             while(isRunning) {
                 socket.receive(packet);
                 String sender = new String(packet.getData()).trim();
+                publishProgress(sender);
+                Thread.sleep(3000);
                 logger.d("UDP Broadcast Received at " + System.currentTimeMillis());
             }
         }
@@ -41,9 +48,11 @@ public class ListenerThread extends AppCompatActivity implements Runnable{
             e.printStackTrace();
             isRunning = false;
         }
+        return "EXIT";
     }
 
-    public void kill(){
-        isRunning = false;
+    @Override
+    protected void onProgressUpdate(String...params){
+        Toast.makeText(context,"Message from " +params[0]+". Pothole Ahead!",Toast.LENGTH_SHORT).show();
     }
 }
