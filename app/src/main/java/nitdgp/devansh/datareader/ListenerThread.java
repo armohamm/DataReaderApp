@@ -4,6 +4,7 @@ package nitdgp.devansh.datareader;
  * Created by devansh on 25/7/17.
  */
 
+import android.os.Process;
 import android.support.v7.app.AppCompatActivity;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,14 +17,15 @@ public class ListenerThread extends AppCompatActivity implements Runnable{
     private boolean isRunning;
     public Logger logger;
 
-    public ListenerThread(){
+    public ListenerThread(Logger logger){
         isRunning = false;
-        logger = new Logger("DataReader","receiver.txt");
+        this.logger = logger;
     }
 
     @Override
     public void run(){
         try{
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             socket = new DatagramSocket(8080, InetAddress.getByName("192.168.43.255"));
             socket.setBroadcast(true);
             isRunning = true;

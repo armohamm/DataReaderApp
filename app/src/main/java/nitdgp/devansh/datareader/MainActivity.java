@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public Thread broadcastThread;
     public Thread listenThread;
     public Logger logger;
+    public Logger loggerBroadcast;
+    public Logger loggerReceive;
     public final long TIME_INTERVAL = 1000;
     public long LAST_BROADCAST;
 
@@ -92,12 +94,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             gpsText.setText(text);
             bestKnown = lastKnown;
         }
-        listenerThread = new ListenerThread();
-        broadcastingThread = new BroadcastingThread("192.168.43.255",8080);
-        listenThread = new Thread(listenerThread);
-        listenThread.start();
         LAST_BROADCAST = System.currentTimeMillis();
         logger = new Logger("DataReader");
+        loggerBroadcast = new Logger("DataReader","broadcast.txt");
+        loggerReceive = new Logger("DataReader","receiver.txt");
+        listenerThread = new ListenerThread(loggerReceive);
+        broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
+        listenThread = new Thread(listenerThread);
+        listenThread.start();
     }
 
     @Override

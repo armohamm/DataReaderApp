@@ -16,10 +16,10 @@ public class BroadcastingThread implements Runnable{
     private byte buffer[];
     public Logger logger;
 
-    public BroadcastingThread(String BROADCAST_IP,int PORT){
+    public BroadcastingThread(Logger logger,String BROADCAST_IP,int PORT){
         this.BROADCAST_IP = BROADCAST_IP;
         this.PORT = PORT;
-        logger = new Logger("DataReader","broadcast.txt");
+        this.logger = logger;
     }
 
     @Override
