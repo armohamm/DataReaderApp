@@ -25,11 +25,11 @@ public class BroadcastingThread implements Runnable{
     @Override
     public void run(){
         try{
-            this.socket = new DatagramSocket();
-            this.socket.setBroadcast(true);
-            this.buffer = BROADCAST_IP.getBytes();
-            this.packet = new DatagramPacket(buffer,buffer.length,InetAddress.getByName(BROADCAST_IP),PORT);
-            this.socket.send(packet);
+            socket = new DatagramSocket();
+            socket.setBroadcast(true);
+            buffer = BROADCAST_IP.getBytes();
+            packet = new DatagramPacket(buffer,buffer.length,InetAddress.getByName(BROADCAST_IP),PORT);
+            socket.send(packet);
             logger.d("UDP Broadcast Sent At "+System.currentTimeMillis());
         }
         catch (Exception e){

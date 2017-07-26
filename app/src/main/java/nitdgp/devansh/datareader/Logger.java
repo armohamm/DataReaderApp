@@ -22,11 +22,11 @@ public class Logger {
             if(!this.folder.exists()){
                 this.folder.mkdir();
             }
-            this.logFile = new File(Environment.getExternalStorageDirectory() + "/"+folder, filename);
+            logFile = new File(Environment.getExternalStorageDirectory() + "/"+folder, filename);
             if(!logFile.exists()){
                 logFile.createNewFile();
             }
-            this.fileOutputStream = new FileOutputStream(logFile);
+            fileOutputStream = new FileOutputStream(logFile);
         }
         catch (IOException e){
             e.printStackTrace();
@@ -39,11 +39,11 @@ public class Logger {
             if(!this.folder.exists()){
                 this.folder.mkdir();
             }
-            this.logFile = new File(Environment.getExternalStorageDirectory() + "/"+folder, "logFile.txt");
+            logFile = new File(Environment.getExternalStorageDirectory() + "/"+folder, "logFile.txt");
             if(!logFile.exists()){
                 logFile.createNewFile();
             }
-            this.fileOutputStream = new FileOutputStream(logFile);
+            fileOutputStream = new FileOutputStream(logFile);
         }
         catch (IOException e){
             e.printStackTrace();
@@ -52,9 +52,9 @@ public class Logger {
 
     public void d(String text){
         try{
-            this.fileOutputStream.write(text.getBytes());
-            this.fileOutputStream.write(System.getProperty("line.separator").getBytes());
-            this.fileOutputStream.flush();
+            fileOutputStream.write(text.getBytes());
+            fileOutputStream.write(System.getProperty("line.separator").getBytes());
+            fileOutputStream.flush();
         }
         catch (IOException e){
             e.printStackTrace();

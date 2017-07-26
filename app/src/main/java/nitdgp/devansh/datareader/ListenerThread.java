@@ -26,10 +26,10 @@ public class ListenerThread extends AppCompatActivity implements Runnable{
         try{
             socket = new DatagramSocket(8080, InetAddress.getByName("192.168.43.255"));
             socket.setBroadcast(true);
-            this.isRunning = true;
+            isRunning = true;
             buffer = new byte[15000];
             packet = new DatagramPacket(buffer, buffer.length);
-            while(this.isRunning) {
+            while(isRunning) {
                 socket.receive(packet);
                 //String sender = new String(packet.getData()).trim();
                 logger.d("UDP Broadcast Received at " + System.currentTimeMillis());
@@ -37,11 +37,11 @@ public class ListenerThread extends AppCompatActivity implements Runnable{
         }
         catch (Exception e){
             e.printStackTrace();
-            this.isRunning = false;
+            isRunning = false;
         }
     }
 
     public void kill(){
-        this.isRunning = false;
+        isRunning = false;
     }
 }
