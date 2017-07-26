@@ -31,7 +31,7 @@ public class ListenerThread extends AppCompatActivity implements Runnable{
             packet = new DatagramPacket(buffer, buffer.length);
             while(isRunning) {
                 socket.receive(packet);
-                //String sender = new String(packet.getData()).trim();
+                String sender = new String(packet.getData()).trim();
                 logger.d("UDP Broadcast Received at " + System.currentTimeMillis());
             }
         }

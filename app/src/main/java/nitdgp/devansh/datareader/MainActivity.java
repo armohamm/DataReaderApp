@@ -27,8 +27,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener,LocationListener{
 
@@ -42,8 +40,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected ProgressBar progressBarY;
     protected ProgressBar progressBarZ;
     private final int thresholdAccY = 50;
-    public ListenerThread listenerThread = new ListenerThread();
-    public BroadcastingThread broadcastingThread = new BroadcastingThread("192.168.43.255",8080);
+    public ListenerThread listenerThread;
+    public BroadcastingThread broadcastingThread;
     public Thread broadcastThread;
     public Thread listenThread;
     public Logger logger;
@@ -88,11 +86,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         catch (SecurityException e){
             e.printStackTrace();
         }
+
         if(lastKnown!=null) {
             String text = "Latitude = " + lastKnown.getLatitude() + ",Longitude = " + lastKnown.getLongitude();
             gpsText.setText(text);
             bestKnown = lastKnown;
         }
+        listenerThread = new ListenerThread();
+        broadcastingThread = new BroadcastingThread("192.168.43.255",8080);
         listenThread = new Thread(listenerThread);
         listenThread.start();
         LAST_BROADCAST = System.currentTimeMillis();
