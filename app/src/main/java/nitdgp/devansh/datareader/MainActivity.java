@@ -35,21 +35,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected Sensor mAccSensor;
     protected LocationManager mLocationManager;
     protected Location bestKnown;
-    protected TextView gpsText;
-    protected Button gpsTag;
-    protected ProgressBar progressBarX;
-    protected ProgressBar progressBarY;
-    protected ProgressBar progressBarZ;
-    protected final int BUMP_THRESHOLD = 40;
-    protected final int BRAKING_THRESHOLD = 5;
-    protected float lastUpdateY;
     protected ListenerThread listenerThread;
     protected BroadcastingThread broadcastingThread;
     protected Logger logger;
     protected Logger loggerBroadcast;
     protected Logger loggerReceive;
-    protected final long TIME_INTERVAL = 1000;
+    protected TextView gpsText;
+    protected Button gpsTag;
+    protected ProgressBar progressBarX;
+    protected ProgressBar progressBarY;
+    protected ProgressBar progressBarZ;
     protected long LAST_BROADCAST;
+    protected float lastUpdateY;
+    protected final int BUMP_THRESHOLD = 35;
+    protected final int BRAKING_THRESHOLD = 5;
+    protected final String BUMP = "Bump Ahead";
+    protected final String IMMEDIATE_BRAKING = "Immediate Braking Ahead";
+    protected final long BROADCAST_TIME_INTERVAL = 3000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,14 +109,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onRequestPermissionsResult(int requestcode,String[] perms,int[] grantResults){
         if(requestcode==100){
-            if(grantResults.length>0){
                 for(int i=0;i<grantResults.length;i++){
                     if(grantResults[i]!=PackageManager.PERMISSION_GRANTED){
                         Toast.makeText(this,"Permission Denied",Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 }
-            }
         }
     }
 
@@ -170,15 +170,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             progressBarY.setProgress((int)(event.values[1]*10));
             progressBarZ.setProgress((int)(event.values[2]*10));
             if(Math.abs((event.values[1]*10) - lastUpdateY)>=BUMP_THRESHOLD){
-                if((System.currentTimeMillis() - LAST_BROADCAST)>TIME_INTERVAL && bestKnown!=null) {
+                if((System.currentTimeMillis() - LAST_BROADCAST)>BROADCAST_TIME_INTERVAL && bestKnown!=null) {
                     broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
-                    broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,bestKnown.getLatitude()+","+bestKnown.getLongitude(),"BUMP");
+                    broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,bestKnown.getLatitude()+","+bestKnown.getLongitude(),BUMP);
                     LAST_BROADCAST = System.currentTimeMillis();
                 }
-                lastUpdateY = (event.values[1])*10;
                 String logwrite = timestamp + " : X = " + event.values[0] + ", Y = " + event.values[1] + ", Z = " + event.values[2];
                 logger.d(logwrite);
             }
+            lastUpdateY = (event.values[1])*10;
         }
     }
 
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         gpsText.setText(text);
         if((Math.abs(location.getSpeed() - bestKnown.getSpeed()))>=BRAKING_THRESHOLD && bestKnown!=null) {
             broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
-            broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,location.getLatitude()+","+location.getLongitude(),"BRAKING");
+            broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,location.getLatitude()+","+location.getLongitude(),IMMEDIATE_BRAKING);
         }
         bestKnown = location;
     }
