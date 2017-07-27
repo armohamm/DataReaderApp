@@ -10,7 +10,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class BroadcastingThread extends AsyncTask<Location,Void,String>{
+public class BroadcastingThread extends AsyncTask<String,Void,String>{
     private String BROADCAST_IP;
     private int PORT;
     private DatagramPacket packet;
@@ -25,11 +25,11 @@ public class BroadcastingThread extends AsyncTask<Location,Void,String>{
     }
 
     @Override
-    protected String doInBackground(Location... params){
+    protected String doInBackground(String... params){
         try{
             socket = new DatagramSocket();
             socket.setBroadcast(true);
-            buffer = (params[0].getLatitude()+","+params[0].getLongitude()).getBytes();
+            buffer = (params[0]+"-"+params[1]).getBytes();
             packet = new DatagramPacket(buffer,buffer.length,InetAddress.getByName(BROADCAST_IP),PORT);
             socket.send(packet);
             logger.d("UDP Broadcast Sent At "+System.currentTimeMillis());

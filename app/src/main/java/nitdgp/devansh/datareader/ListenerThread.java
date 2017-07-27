@@ -35,9 +35,12 @@ public class ListenerThread extends AsyncTask<Void,String,String>{
             packet = new DatagramPacket(buffer, buffer.length);
             while(isRunning) {
                 socket.receive(packet);
-                String senderLocation = new String(packet.getData()).trim();
-                publishProgress(senderLocation);
-                Thread.sleep(5000);
+                String receiver = new String(packet.getData()).trim();
+                String arr[] = receiver.split("-");
+                String senderLocation = arr[0];
+                String eventType = arr[1];
+                publishProgress(senderLocation,eventType);
+                Thread.sleep(4000);
                 logger.d("UDP Broadcast Received at " + System.currentTimeMillis());
             }
         }
@@ -50,6 +53,6 @@ public class ListenerThread extends AsyncTask<Void,String,String>{
 
     @Override
     protected void onProgressUpdate(String...params){
-        Toast.makeText(context,"Bump at "+params[0]+" !",Toast.LENGTH_LONG).show();
+        Toast.makeText(context,params[1]+" at "+params[0]+" !",Toast.LENGTH_LONG).show();
     }
 }

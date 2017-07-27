@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected ProgressBar progressBarY;
     protected ProgressBar progressBarZ;
     protected final int BUMP_THRESHOLD = 40;
-    protected final int BRAKING_THRESHOLD = 10;
+    protected final int BRAKING_THRESHOLD = 5;
     protected float lastUpdateY;
     protected ListenerThread listenerThread;
     protected BroadcastingThread broadcastingThread;
@@ -170,9 +170,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             progressBarY.setProgress((int)(event.values[1]*10));
             progressBarZ.setProgress((int)(event.values[2]*10));
             if(Math.abs((event.values[1]*10) - lastUpdateY)>=BUMP_THRESHOLD){
-                if((System.currentTimeMillis() - LAST_BROADCAST)>TIME_INTERVAL) {
+                if((System.currentTimeMillis() - LAST_BROADCAST)>TIME_INTERVAL && bestKnown!=null) {
                     broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
-                    broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,bestKnown);
+                    broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,bestKnown.getLatitude()+","+bestKnown.getLongitude(),"BUMP");
                     LAST_BROADCAST = System.currentTimeMillis();
                 }
                 lastUpdateY = (event.values[1])*10;
@@ -186,9 +186,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onLocationChanged(Location location){
         String text = "Latitude = "+location.getLatitude() + ",Longitude = "+location.getLongitude();
         gpsText.setText(text);
-        if((Math.abs(location.getSpeed() - bestKnown.getSpeed()))>=BRAKING_THRESHOLD) {
+        if((Math.abs(location.getSpeed() - bestKnown.getSpeed()))>=BRAKING_THRESHOLD && bestKnown!=null) {
             broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
-            broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,location);
+            broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,location.getLatitude()+","+location.getLongitude(),"BRAKING");
         }
         bestKnown = location;
     }
