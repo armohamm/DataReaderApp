@@ -186,7 +186,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onLocationChanged(Location location){
         String text = "Latitude = "+location.getLatitude() + ",Longitude = "+location.getLongitude();
         gpsText.setText(text);
-        if((Math.abs(location.getSpeed() - bestKnown.getSpeed()))>=BRAKING_THRESHOLD && bestKnown!=null) {
+        if(bestKnown!=null && (Math.abs(location.getSpeed() - bestKnown.getSpeed()))>=BRAKING_THRESHOLD) {
+            broadcastingThread.cancel(true);
             broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
             broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,location.getLatitude()+","+location.getLongitude(),IMMEDIATE_BRAKING);
         }
