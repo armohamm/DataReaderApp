@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected long LAST_BROADCAST;
     protected float lastUpdateY;
     protected final int BUMP_THRESHOLD = 35;
-    protected final int BRAKING_THRESHOLD = 5;
+    protected final int BRAKING_THRESHOLD = 1;
     protected final String BUMP = "Bump Ahead";
     protected final String IMMEDIATE_BRAKING = "Immediate Braking Ahead";
     protected final long BROADCAST_TIME_INTERVAL = 3000;

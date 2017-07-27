@@ -2,10 +2,7 @@
     <string name="app_name">Data Reader</string>
     <string name="locView">Location</string>
     <string name="accView">Accelerometer</string>
-    <string name="accDefault">X = 0, Y = 0, Z = 0</string>
     <string name="locDefault">Fetching Location</string>
-    <string name="tempView">Current Ambience</string>
-    <string name="tempDefault">Fetching Current Ambience Data</string>
     <string name="tagGPS">Tag the pothole with GPS!</string>
     <string name="startBtn">Start</string>
     <string name="stopBtn">Stop</string>
