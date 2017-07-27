@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected ProgressBar progressBarX;
     protected ProgressBar progressBarY;
     protected ProgressBar progressBarZ;
-    protected final int bumpThreshold = 40;
+    protected final int BUMP_THRESHOLD = 40;
     protected float lastUpdateY;
     protected ListenerThread listenerThread;
     protected BroadcastingThread broadcastingThread;
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             progressBarX.setProgress((int)(event.values[0]*10));
             progressBarY.setProgress((int)(event.values[1]*10));
             progressBarZ.setProgress((int)(event.values[2]*10));
-            if(Math.abs((event.values[1]*10) - lastUpdateY)>=bumpThreshold){
+            if(Math.abs((event.values[1]*10) - lastUpdateY)>=BUMP_THRESHOLD){
                 if((System.currentTimeMillis() - LAST_BROADCAST)>TIME_INTERVAL) {
                     broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
                     broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,bestKnown);
