@@ -40,15 +40,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected ProgressBar progressBarX;
     protected ProgressBar progressBarY;
     protected ProgressBar progressBarZ;
-    private final int thresholdAccY = 50;
-    public ListenerThread listenerThread;
-    public BroadcastingThread broadcastingThread;
-    public Thread broadcastThread;
-    public Logger logger;
-    public Logger loggerBroadcast;
-    public Logger loggerReceive;
-    public final long TIME_INTERVAL = 1000;
-    public long LAST_BROADCAST;
+    protected final int bumpThreshold = 40;
+    protected float lastUpdateY;
+    protected ListenerThread listenerThread;
+    protected BroadcastingThread broadcastingThread;
+    protected Logger logger;
+    protected Logger loggerBroadcast;
+    protected Logger loggerReceive;
+    protected final long TIME_INTERVAL = 1000;
+    protected long LAST_BROADCAST;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         progressBarY.setMax(100);
         progressBarZ = (ProgressBar) findViewById(R.id.progressBarZ);
         progressBarZ.setMax(100);
+        lastUpdateY = 0;
         Location lastKnown=null;
         try {
             lastKnown = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -153,8 +154,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    protected void onActivityResult(int requestcode,int resultcode,Intent intent){
-        if(requestcode==1 && resultcode==RESULT_OK){
+    protected void onActivityResult(int requestCode,int resultCode,Intent intent){
+        if(requestCode==1 && resultCode==RESULT_OK){
             Toast.makeText(this,"Image successfully captured",Toast.LENGTH_SHORT).show();
         }
     }
@@ -167,12 +168,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             progressBarX.setProgress((int)(event.values[0]*10));
             progressBarY.setProgress((int)(event.values[1]*10));
             progressBarZ.setProgress((int)(event.values[2]*10));
-            if(thresholdAccY<=event.values[1]*10) {
+            if(Math.abs((event.values[1]*10) - lastUpdateY)>=bumpThreshold){
                 if((System.currentTimeMillis() - LAST_BROADCAST)>TIME_INTERVAL) {
                     broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
                     broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,bestKnown);
                     LAST_BROADCAST = System.currentTimeMillis();
                 }
+                lastUpdateY = (event.values[1])*10;
                 String logwrite = timestamp + " : X = " + event.values[0] + ", Y = " + event.values[1] + ", Z = " + event.values[2];
                 logger.d(logwrite);
             }
@@ -215,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public  void onAccuracyChanged(Sensor arg0, int arg1){
-
     }
 
     @Override
@@ -229,7 +230,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onStatusChanged(String s,int i, Bundle bundle){
-
     }
 
 }

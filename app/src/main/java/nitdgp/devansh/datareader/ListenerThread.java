@@ -50,6 +50,6 @@ public class ListenerThread extends AsyncTask<Void,String,String>{
 
     @Override
     protected void onProgressUpdate(String...params){
-        Toast.makeText(context,"Pothole at "+params[0]+" !",Toast.LENGTH_LONG).show();
+        Toast.makeText(context,"Bump at "+params[0]+" !",Toast.LENGTH_LONG).show();
     }
 }
