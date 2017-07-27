@@ -16,6 +16,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -98,8 +99,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         loggerBroadcast = new Logger("DataReader","broadcast.txt");
         loggerReceive = new Logger("DataReader","receiver.txt");
         listenerThread = new ListenerThread(loggerReceive,getApplicationContext());
-        listenerThread.execute();
-        broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
+        listenerThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -118,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void startAcc(View v){
         mSensorManager.registerListener(this,mAccSensor,SensorManager.SENSOR_DELAY_NORMAL*20,SensorManager.SENSOR_DELAY_NORMAL*20);
+        logger.revive();
     }
 
     public void stopAcc(View v){
@@ -168,8 +169,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             progressBarZ.setProgress((int)(event.values[2]*10));
             if(thresholdAccY<=event.values[1]*10) {
                 if((System.currentTimeMillis() - LAST_BROADCAST)>TIME_INTERVAL) {
-                    broadcastThread = new Thread(broadcastingThread);
-                    broadcastThread.start();
+                    broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
+                    broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,bestKnown);
                     LAST_BROADCAST = System.currentTimeMillis();
                 }
                 String logwrite = timestamp + " : X = " + event.values[0] + ", Y = " + event.values[1] + ", Z = " + event.values[2];
@@ -224,7 +225,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onProviderDisabled(String s){
-        Toast.makeText(this,"Please enable GPS",Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -4,12 +4,9 @@ package nitdgp.devansh.datareader;
  * Created by devansh on 25/7/17.
  */
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.widget.Toast;
-
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -38,9 +35,9 @@ public class ListenerThread extends AsyncTask<Void,String,String>{
             packet = new DatagramPacket(buffer, buffer.length);
             while(isRunning) {
                 socket.receive(packet);
-                String sender = new String(packet.getData()).trim();
-                publishProgress(sender);
-                Thread.sleep(3000);
+                String senderLocation = new String(packet.getData()).trim();
+                publishProgress(senderLocation);
+                Thread.sleep(5000);
                 logger.d("UDP Broadcast Received at " + System.currentTimeMillis());
             }
         }
@@ -53,6 +50,6 @@ public class ListenerThread extends AsyncTask<Void,String,String>{
 
     @Override
     protected void onProgressUpdate(String...params){
-        Toast.makeText(context,"Message from " +params[0]+". Pothole Ahead!",Toast.LENGTH_SHORT).show();
+        Toast.makeText(context,"Pothole at "+params[0]+" !",Toast.LENGTH_LONG).show();
     }
 }

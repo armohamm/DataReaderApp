@@ -69,4 +69,13 @@ public class Logger {
             e.printStackTrace();
         }
     }
+
+    public void revive(){
+        try{
+            fileOutputStream = new FileOutputStream(logFile);
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 }
