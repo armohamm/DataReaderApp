@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected ProgressBar progressBarY;
     protected ProgressBar progressBarZ;
     protected final int BUMP_THRESHOLD = 40;
+    protected final int BRAKING_THRESHOLD = 10;
     protected float lastUpdateY;
     protected ListenerThread listenerThread;
     protected BroadcastingThread broadcastingThread;
@@ -185,6 +186,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onLocationChanged(Location location){
         String text = "Latitude = "+location.getLatitude() + ",Longitude = "+location.getLongitude();
         gpsText.setText(text);
+        if((Math.abs(location.getSpeed() - bestKnown.getSpeed()))>=BRAKING_THRESHOLD) {
+            broadcastingThread = new BroadcastingThread(loggerBroadcast,"192.168.43.255",8080);
+            broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,location);
+        }
         bestKnown = location;
     }
 
