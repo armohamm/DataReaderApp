@@ -19,11 +19,13 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,9 +47,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected ProgressBar progressBarX;
     protected ProgressBar progressBarY;
     protected ProgressBar progressBarZ;
+    protected TextView tripName;
+    protected String currentTripName = "";
+    protected EditText editTripName;
     protected long LAST_BROADCAST;
     protected float lastUpdateY;
-    protected final int BUMP_THRESHOLD = 35;
+    protected final int BUMP_THRESHOLD = 5;
     protected final int BRAKING_THRESHOLD = 1;
     protected final String BUMP = "Bump Ahead";
     protected final String IMMEDIATE_BRAKING = "Immediate Braking Ahead";
@@ -69,6 +74,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         Manifest.permission.WRITE_EXTERNAL_STORAGE
                 },
                 100);
+        File folder = new File(Environment.getExternalStorageDirectory()+"/DataReader");
+        if(!folder.exists()){
+            boolean result = folder.mkdir();
+            if (!result){
+                return;
+            }
+        }
         try {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,this);
@@ -84,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         progressBarY.setMax(100);
         progressBarZ = (ProgressBar) findViewById(R.id.progressBarZ);
         progressBarZ.setMax(100);
+        tripName = (TextView) findViewById(R.id.tripNameText);
+        editTripName = (EditText) findViewById(R.id.tripName);
         lastUpdateY = 0;
         Location lastKnown=null;
         try {
@@ -99,9 +113,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             bestKnown = lastKnown;
         }
         LAST_BROADCAST = System.currentTimeMillis();
-        logger = new Logger("DataReader");
-        loggerBroadcast = new Logger("DataReader","broadcast.txt");
-        loggerReceive = new Logger("DataReader","receiver.txt");
+        loggerReceive = new Logger("Received_Broadcasts",System.currentTimeMillis()+".txt");
         listenerThread = new ListenerThread(loggerReceive,getApplicationContext());
         listenerThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -118,9 +130,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+    public void saveTripName(View v){
+        currentTripName = editTripName.getText().toString();
+        if (currentTripName.equals("")){
+            tripName.setText(R.string.tripName);
+        }
+        else {
+            tripName.setText(currentTripName);
+            editTripName.setText("");
+        }
+    }
+
     public void startAcc(View v){
-        mSensorManager.registerListener(this,mAccSensor,SensorManager.SENSOR_DELAY_NORMAL*20,SensorManager.SENSOR_DELAY_NORMAL*20);
-        logger.revive();
+        if (!currentTripName.equals("")) {
+            mSensorManager.registerListener(this, mAccSensor, SensorManager.SENSOR_DELAY_NORMAL * 20, SensorManager.SENSOR_DELAY_NORMAL * 20);
+            logger = new Logger(currentTripName);
+            loggerBroadcast = new Logger(currentTripName, "broadcast.txt");
+        }
+        else {
+            Toast.makeText(this,"Please enter a trip name!",Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void stopAcc(View v){
@@ -128,6 +157,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         progressBarX.setProgress(0);
         progressBarY.setProgress(0);
         progressBarZ.setProgress(0);
+        tripName.setText(R.string.tripName);
+        Toast.makeText(this,"Logs for trip: " + currentTripName + " stored.", Toast.LENGTH_SHORT).show();
+        currentTripName = "";
         logger.close();
     }
 
@@ -175,8 +207,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     broadcastingThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,bestKnown.getLatitude()+","+bestKnown.getLongitude(),BUMP);
                     LAST_BROADCAST = System.currentTimeMillis();
                 }
-                String logwrite = timestamp + " : X = " + event.values[0] + ", Y = " + event.values[1] + ", Z = " + event.values[2];
-                logger.d(logwrite);
+                String logEntry = timestamp + " : X = " + event.values[0] + ", Y = " + event.values[1] + ", Z = " + event.values[2];
+                logger.d(logEntry);
             }
             lastUpdateY = (event.values[1])*10;
         }

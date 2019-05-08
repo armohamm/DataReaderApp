@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Data Reader</string>
     <string name="locView">Location</string>
+    <string name="tripName">Name your trip!</string>
+    <string name="tripNameButton">Save Trip Name</string>
     <string name="accView">Accelerometer</string>
     <string name="locDefault">Fetching Location</string>
     <string name="tagGPS">Tag the pothole with GPS!</string>

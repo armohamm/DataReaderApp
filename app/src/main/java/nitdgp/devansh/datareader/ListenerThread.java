@@ -40,7 +40,7 @@ public class ListenerThread extends AsyncTask<Void,String,String>{
                 String senderLocation = arr[0];
                 String eventType = arr[1];
                 publishProgress(senderLocation,eventType);
-                Thread.sleep(3000);
+                Thread.sleep(2000);
                 logger.d("UDP Broadcast Received at " + System.currentTimeMillis());
             }
         }

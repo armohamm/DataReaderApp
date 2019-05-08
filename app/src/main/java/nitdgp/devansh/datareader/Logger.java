@@ -18,11 +18,11 @@ public class Logger {
 
     public Logger(String folder,String filename){
         try {
-            this.folder = new File(Environment.getExternalStorageDirectory()+"/"+folder);
+            this.folder = new File(Environment.getExternalStorageDirectory()+"/DataReader/"+folder);
             if(!this.folder.exists()){
                 this.folder.mkdir();
             }
-            logFile = new File(Environment.getExternalStorageDirectory() + "/"+folder, filename);
+            logFile = new File(Environment.getExternalStorageDirectory() + "/DataReader/"+folder, filename);
             if(!logFile.exists()){
                 logFile.createNewFile();
             }
@@ -35,11 +35,11 @@ public class Logger {
 
     public Logger(String folder){
         try {
-            this.folder = new File(Environment.getExternalStorageDirectory()+"/"+folder);
+            this.folder = new File(Environment.getExternalStorageDirectory()+"/DataReader/"+folder);
             if(!this.folder.exists()){
                 this.folder.mkdir();
             }
-            logFile = new File(Environment.getExternalStorageDirectory() + "/"+folder, "logFile.txt");
+            logFile = new File(Environment.getExternalStorageDirectory() + "/DataReader/"+folder, "logFile.txt");
             if(!logFile.exists()){
                 logFile.createNewFile();
             }
